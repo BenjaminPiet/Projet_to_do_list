@@ -31,12 +31,13 @@ class Task{
     void change_description();
     void change_priority();
     void change_commentary();
-    void add_subtask(Task* new_sub_task);
+    void add_subtask();
     void change_percent();
+    void change_closing_date();
     void close_task();
     void activate_task();
     void print();
-    void print_sub_task();//un peu différent de print, on ne fera qu'apparaitre les titres
+    void print_sub_task(Task* ad_sub_task);//un peu différent de print, on ne fera qu'apparaitre les titres
     void print_title();
 
 
@@ -54,6 +55,7 @@ class Task_manager{
     public:
     Task_manager():nbr(0){};
     void read_save_file();
+    void save_task(Task* new_ad_task);
     void init();
     void print_task_list();
     void add_task();
@@ -61,7 +63,6 @@ class Task_manager{
     std::string ask_status();
     void select_task(int n);
     void reinit_task_manager();
-    void save_task();
     void modify_task(int n);
     void remove_task();
 

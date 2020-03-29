@@ -24,7 +24,7 @@ void Task :: change_commentary(){
 }
 void Task :: change_percent(){
     std::cout<<"Nouveau pourcentage(entre 0 et 100):";
-    double new_percent;
+    std::string new_percent;
     std::cin>>new_percent;
     percent=new_percent;
 }
@@ -37,9 +37,35 @@ void Task :: change_priority(){
     else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl; 
         change_priority();}    
 }
-void Task :: add_subtask(Task* new_sub_task){//Option pas encore disponible
-    sub_task.push_back(new_sub_task);
+
+void Task::change_closing_date(){
+    std::cout<<"Nouvelle date de cloture:";
+    std::string new_closing_date;
+    std::cin>>new_closing_date;
+    closing_date=new_closing_date;
+}
+void Task :: add_subtask(){//On ne va que demander un titre, un pourcentage, et une date de cloture pour les sous-taches
+    std::cout<<"------Menu d'ajout de sous tache-------"<<std::endl;
+    std::string sub_title;
+    std::string pourcentage_sub;
+    std::string date_cloture_sub;
+    std::cout<<"Titre de la sous-tache:";
+    std::cin>>sub_title;
+    std::cout<<""<<std::endl;
+    std::cout<<"Pourcentage de la sous-tache:";
+    std::cin>>pourcentage_sub;
+    std::cout<<""<<std::endl;
+    std::cout<<"Date de cloture de la sous-tache:";
+    std::cin>>date_cloture_sub;
+    std::cout<<""<<std::endl;
+    Task* new_ad_subtask=new Task(0,sub_title,"","",pourcentage_sub,"","",date_cloture_sub);
+    sub_task.push_back(new_ad_subtask);
+    std::cout<<"Ajout de sous tache confirmé"<<std::endl;
 } 
+
+void Task::print_sub_task(Task* ad_sub_task){
+    std::cout<<"    -"<<ad_sub_task->title<<", "<<ad_sub_task->percent<<"%, "<<ad_sub_task->closing_date<<std::endl;
+}
 void Task::print_title(){ // utilisé seulement pour print_list_task
     std::cout<<". Titre : "<<title<<std::endl;
 }
@@ -53,7 +79,7 @@ void Task::print(){
     std::cout<<"Date fermeture :"<<closing_date<<std::endl;
     std::cout<<"Sous-taches : "<<std::endl;  
     for(auto e :sub_task){
-        e->print();
+        print_sub_task(e);
         std::cout<<""<<std::endl;//pour rajouter une ligne blanche entre chaque sous-taches
         };
 
@@ -77,7 +103,8 @@ void Task_manager::modify_task(int n){
     std::cout<<"3.Changer le commentaire"<<std::endl;
     std::cout<<"4.Changer la priorité"<<std::endl;
     std::cout<<"5.Changer le pourcentage"<<std::endl;
-    std::cout<<"6.Ajouter une sous-tache (pas encore disponible)"<<std::endl;
+    std::cout<<"6.Changer la date de cloture"<<std::endl;
+    std::cout<<"7.Ajouter une sous-tache"<<std::endl;
     int choix=0;
     std::cin>>choix;
     if(choix==0){select_task(n);}
@@ -96,8 +123,11 @@ void Task_manager::modify_task(int n){
     else if(choix==5){selected_ad_task->change_percent();
                     std::cout<<"Changement confirmé"<<std::endl;
                     modify_task(n);}
-    else if(choix==6){
-        std::cout<<"J'ai pourtant dis que c'était pas encore dispo..."<<std::endl;
+    else if(choix==6){selected_ad_task->change_closing_date();
+                    std::cout<<"Changement confirmé"<<std::endl;
+                    modify_task(n);}
+    else if(choix==7){
+        selected_ad_task->add_subtask();
         modify_task(n);
         }
     else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl;
@@ -176,6 +206,21 @@ std::string Task_manager::ask_status(){
     return "";}
     }
 
+void Task_manager::save_task(Task* new_ad_task){
+    std::ofstream fichier("Save_list.txt");
+    if (fichier){
+        fichier.seekp(0,std::ios::end);
+        fichier<<new_ad_task->title<<std::endl;
+        fichier<<new_ad_task->description<<std::endl;
+        fichier<<new_ad_task->status<<std::endl;
+        fichier<<new_ad_task->percent<<std::endl;
+        fichier<<new_ad_task->priority<<std::endl;
+        fichier<<new_ad_task->commentary<<std::endl;
+        fichier<<new_ad_task->closing_date<<std::endl;
+}
+    else{std::cout<<"ERREUR, impossible d'acceder au fichier de sauvegarde"<<std::endl;}
+}
+
 void Task_manager::add_task(){
     std::cout<<"-------------Menu d'ajout de tache--------------"<<std::endl;
     std::string titre="";
@@ -195,12 +240,16 @@ void Task_manager::add_task(){
     std::cout<<""<<std::endl;
     priorit=ask_priority();
     stat=ask_status();
+    std::string percent;
+    std::cout<<"Pourcentage :";
+    std::cin>>percent;
+    std::cout<<""<<std::endl;
     std::string date_cloture;
     std::cout<<"Date de cloture (format dd/mm/aaaa) :";
     std::cin>>date_cloture;
     std::cout<<""<<std::endl;
     int id=0;//à trouver après en lisant fichier texte
-    Task* ad_new_task= new Task(id,titre,desc, stat,"0",priorit,com,date_cloture);
+    Task* ad_new_task= new Task(id,titre,desc, stat,percent,priorit,com,date_cloture);
     std::cout<<"Voulez vous ajouter cette tache au TaskManager?"<<std::endl;
     std::cout<<"0.Non      1.Oui"<<std::endl;
     ad_new_task->print();
@@ -214,6 +263,7 @@ void Task_manager::add_task(){
         vect_ad_tache.push_back(ad_new_task);
         nbr++;
         std::cout<<"ajout de tache confirmé"<<std::endl;
+        save_task(ad_new_task);
         init();
         }
 }
@@ -230,6 +280,7 @@ void Task_manager::reinit_task_manager(){
 void Task_manager::read_save_file(){
     std::ifstream fichier("Save_list.txt");
     if(fichier){
+        fichier.seekg(0,std::ios::beg);
         int numero_ligne=0;
         int numero_tache=0;
         int id;
@@ -255,7 +306,6 @@ void Task_manager::read_save_file(){
                 Task* new_ad_task=new Task(id,title,description,status,percent,priority,commentary,date_cloture);
                 vect_ad_tache.push_back(new_ad_task);
                 nbr++;
-                new_ad_task->print();
                 numero_ligne=0;
                 numero_tache++;
                 }
@@ -266,10 +316,10 @@ void Task_manager::read_save_file(){
     else{
         std::cout<<"ERREUR: Impossible d'ouvrir ficher de sauvegarde"<<std::endl;
     }
+    init();
 }
 
 void Task_manager::init(){
-     read_save_file();
      std::cout<<"----------------Menu du TaskManager---------------"<<std::endl;
      std::cout<<"0.Quitter"<<std::endl;
      std::cout<<"1.Liste des taches"<<std::endl; 
@@ -291,5 +341,5 @@ void Task_manager::init(){
 
  int main(){
     Task_manager toto;
-    toto.init();
+    toto.read_save_file();
  }
