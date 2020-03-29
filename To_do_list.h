@@ -16,8 +16,8 @@ class Task{
     protected:
     int id;//
     time_t creation_date;//à prendre directemnet dans horloge
-    time_t closing_date;
-    double percent;
+    std::string closing_date;//à l'utilisateur de définir la date de fin de la tache
+    std::string percent;//plus facile d'en faire une chaine de caractères pour la lecture du fichier
     std::string title;
     std::string description;
     std::string status;//ouvert ou fermé
@@ -25,8 +25,8 @@ class Task{
     std::string commentary;
     std::vector<Task*> sub_task;
     public:
-    Task(int ID,std::string titre,std::string des, std::string stat, double percentage, std::string prio ,std::string comment ): 
-        id(ID), title(titre), description(des),status(stat), percent(percentage), priority(prio), commentary(comment){}
+    Task(int ID,std::string titre,std::string des, std::string stat, std::string percentage, std::string prio ,std::string comment,std::string date_cloture ): 
+        id(ID), title(titre), description(des),status(stat), percent(percentage), priority(prio), commentary(comment), closing_date(date_cloture){}
 
 
     void change_title();
@@ -56,6 +56,7 @@ class Task_manager{
     std::vector<Task*> vect_ad_tache;
     public:
     Task_manager():nbr(0){};
+    void read_save_file();
     void init();
     void print_task_list();
     void add_task();

@@ -34,12 +34,13 @@ void Task :: change_priority(){
     std::cin>>choix_prio;
     if(choix_prio==0){priority="faible";}
     else if(choix_prio==1){priority="prioritaire";}
-    else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl; change_priority();}    
+    else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl; 
+        change_priority();}    
 }
-void Task :: add_subtask(Task* new_sub_task){
+void Task :: add_subtask(Task* new_sub_task){//Option pas encore disponible
     sub_task.push_back(new_sub_task);
 } 
-void Task::print_title(){
+void Task::print_title(){ // utilisé seulement pour print_list_task
     std::cout<<". Titre : "<<title<<std::endl;
 }
 void Task::print(){
@@ -57,10 +58,11 @@ void Task::print(){
 
 }
 
-void Task :: take_creation_time(){
+void Task :: take_creation_time(){//Ne devrait être appellée que lors de la création d'une tache. 
+                                //cependant problèmes avec time_t pour avoir une date correct
 
 }
-void Task :: close_task(){
+void Task :: close_task(){ //On ne change pas la date de cloture, car celle ci sera décidée par l'utilisateur
      status="fermé";
 }
 void Task :: activate_task(){
@@ -195,8 +197,12 @@ void Task_manager::add_task(){
     std::cout<<""<<std::endl;
     priorit=ask_priority();
     stat=ask_status();
+    std::string date_cloture;
+    std::cout<<"Date de cloture (format dd/mm/aaaa) :";
+    std::cin>>date_cloture;
+    std::cout<<""<<std::endl;
     int id=0;//à trouver après en lisant fichier texte
-    Task* ad_new_task= new Task(id,titre,desc, stat,0,priorit,com);
+    Task* ad_new_task= new Task(id,titre,desc, stat,"0",priorit,com,date_cloture);
     std::cout<<"Voulez vous ajouter cette tache au TaskManager?"<<std::endl;
     std::cout<<"0.Non      1.Oui"<<std::endl;
     ad_new_task->print();
@@ -223,9 +229,47 @@ void Task_manager::reinit_task_manager(){
     std::cout<<"retour au menu principal"<<std::endl;
     init();
 }
+void Task_manager::read_save_file(){
+    std::ifstream fichier("C:/Users/benja/projects/Cours_cpp/Projet_to_do_list/Save_list.txt");
+    if(fichier){
+        int numero_ligne=0;
+        int numero_tache=0;
+        int id;
+        std::string title;
+        std::string description;
+        std::string status;
+        std::string percent;
+        std::string priority;
+        std::string commentary;
+        std::string date_cloture;
 
- void Task_manager::init(){
-     //chercher à recreer le task_manager en lisant fichier texte
+        std::string ligne;
+        while(std::getline(fichier,ligne)){
+            id=numero_tache;
+            if(numero_ligne==0){title=ligne;numero_ligne++;}
+            else if(numero_ligne==1){description=ligne;numero_ligne++;}
+            else if(numero_ligne==2){status=ligne;numero_ligne++;}
+            else if(numero_ligne==3){percent=ligne;numero_ligne++;}
+            else if(numero_ligne==4){priority=ligne;numero_ligne++;}
+            else if(numero_ligne==5){commentary=ligne;numero_ligne++;}
+            else if(numero_ligne==6){
+                date_cloture=ligne;
+                Task* new_ad_task=new Task(id,title,description,status,percent,priority,commentary,date_cloture);
+                vect_ad_tache.push_back(new_ad_task);
+                numero_ligne=0;
+                numero_tache++;
+                }
+
+        }
+
+    }
+    else{
+        std::cout<<"ERREUR: Impossible d'ouvrir ficher de sauvegarde"<<std::endl;
+    }
+}
+
+void Task_manager::init(){
+     read_save_file();
      std::cout<<"----------------Menu du TaskManager---------------"<<std::endl;
      std::cout<<"0.Quitter"<<std::endl;
      std::cout<<"1.Liste des taches"<<std::endl; 
