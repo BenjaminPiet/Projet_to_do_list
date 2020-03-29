@@ -50,6 +50,7 @@ void Task::print(){
     std::cout<<"Priorité : "<<priority<<std::endl; 
     std::cout<<"Commentaire : "<<commentary<<std::endl; 
     std::cout<<"Pourcentage : "<<percent<<"%"<<std::endl;
+    std::cout<<"Date fermeture :"<<closing_date<<std::endl;
     std::cout<<"Sous-taches : "<<std::endl;  
     for(auto e :sub_task){
         e->print();
@@ -58,10 +59,7 @@ void Task::print(){
 
 }
 
-void Task :: take_creation_time(){//Ne devrait être appellée que lors de la création d'une tache. 
-                                //cependant problèmes avec time_t pour avoir une date correct
 
-}
 void Task :: close_task(){ //On ne change pas la date de cloture, car celle ci sera décidée par l'utilisateur
      status="fermé";
 }
@@ -230,7 +228,7 @@ void Task_manager::reinit_task_manager(){
     init();
 }
 void Task_manager::read_save_file(){
-    std::ifstream fichier("C:/Users/benja/projects/Cours_cpp/Projet_to_do_list/Save_list.txt");
+    std::ifstream fichier("Save_list.txt");
     if(fichier){
         int numero_ligne=0;
         int numero_tache=0;
@@ -256,6 +254,8 @@ void Task_manager::read_save_file(){
                 date_cloture=ligne;
                 Task* new_ad_task=new Task(id,title,description,status,percent,priority,commentary,date_cloture);
                 vect_ad_tache.push_back(new_ad_task);
+                nbr++;
+                new_ad_task->print();
                 numero_ligne=0;
                 numero_tache++;
                 }

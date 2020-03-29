@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <ctime>
 #include <vector>
 #include <exception>
 #ifndef TO_DO_LIST_H
@@ -15,7 +14,6 @@ class Task{
     friend class Task_manager;
     protected:
     int id;//
-    time_t creation_date;//à prendre directemnet dans horloge
     std::string closing_date;//à l'utilisateur de définir la date de fin de la tache
     std::string percent;//plus facile d'en faire une chaine de caractères pour la lecture du fichier
     std::string title;
@@ -35,7 +33,6 @@ class Task{
     void change_commentary();
     void add_subtask(Task* new_sub_task);
     void change_percent();
-    void take_creation_time();
     void close_task();
     void activate_task();
     void print();
