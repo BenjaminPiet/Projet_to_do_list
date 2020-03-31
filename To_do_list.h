@@ -64,7 +64,8 @@ class Task_manager{
     void select_task(int n);
     void reinit_task_manager();
     void modify_task(int n);
-    void remove_task();
+    void remove_task(int n);
+    void delete_sub_task(int n);
 
 
 };

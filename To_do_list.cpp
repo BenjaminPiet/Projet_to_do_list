@@ -95,6 +95,27 @@ void Task :: activate_task(){
 }
 
  //////////////Fonctions relatives à Taskmanager ///////////
+void Task_manager::delete_sub_task(int n){
+        Task* selected_ad_task=vect_ad_tache[n];
+        std::cout<<"------Menu de supression de sous-tache------"<<std::endl;
+        std::cout<<"Quel sous-tache voulez vous supprimer?"<<std::endl;
+        std::cout<<"0.Annuler"<<std::endl;
+        int i=1;
+        for(auto e:selected_ad_task->sub_task){
+            std::cout<<i;
+            selected_ad_task->print_sub_task(e);
+            i++;
+        }
+        int choix=0;
+        std::cin>>choix;
+        if(choix==0){modify_task(n);}
+        else if(choix!=0 && choix<selected_ad_task->sub_task.size()){
+            selected_ad_task->sub_task.erase(selected_ad_task->sub_task.begin()+i-1);
+        }
+        else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl;delete_sub_task(n);}
+
+}
+
 void Task_manager::modify_task(int n){
     Task* selected_ad_task=vect_ad_tache[n];
     std::cout<<"-----Menu de modification-----"<<std::endl;
@@ -106,6 +127,7 @@ void Task_manager::modify_task(int n){
     std::cout<<"5.Changer le pourcentage"<<std::endl;
     std::cout<<"6.Changer la date de cloture"<<std::endl;
     std::cout<<"7.Ajouter une sous-tache"<<std::endl;
+    std::cout<<"8.Supprimer une sous tache"<<std::endl;
     int choix=0;
     std::cin>>choix;
     if(choix==0){select_task(n);}
@@ -131,8 +153,14 @@ void Task_manager::modify_task(int n){
         selected_ad_task->add_subtask();
         modify_task(n);
         }
+    else if(choix==8){delete_sub_task(n);}
     else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl;
         modify_task(n);}
+}
+void Task_manager::remove_task(int n){
+    vect_ad_tache.erase(vect_ad_tache.begin()+n);
+    print_task_list();// fait un pop de la tache dans la liste de tache 
+                     //il ne sera donc pas sauvegardé
 }
 
 void Task_manager::select_task(int n){
@@ -146,6 +174,7 @@ void Task_manager::select_task(int n){
         std::cout<<"1.Modifier la tache selectionnée"<<std::endl;
         std::cout<<"2.Fermer la tache (celle ci apparaitra encore dans la liste)"<<std::endl;
         std::cout<<"3.Activer la tache"<<std::endl;
+        std::cout<<"4.Supprimer la tache(attention, ceci est definitif)"<<std::endl;
         int num=0;
         std::cin>>num;
         if(num==0){print_task_list();}
@@ -154,6 +183,7 @@ void Task_manager::select_task(int n){
                         init();}
         else if(num==3){selected_ad_task->activate_task();
                         select_task(n);}
+        else if(num==4){remove_task(n);}
         else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl;
         select_task(n);}
         
@@ -283,8 +313,10 @@ void Task_manager::add_task(){
 
 
 void Task_manager::reinit_task_manager(){
-    std::cout<<"cette fonction n'est pas encore disponible"<<std::endl;
-    std::cout<<"retour au menu principal"<<std::endl;
+    while(vect_ad_tache.size()!=0){
+        vect_ad_tache.erase(vect_ad_tache.begin());
+    }
+    std::cout<<"Task_manager réinitialisé. Retour au menu principal"<<std::endl;
     init();
 }
 void Task_manager::read_save_file(){
@@ -323,31 +355,19 @@ void Task_manager::read_save_file(){
                 date_cloture=ligne;
                 Task* new_ad_task=new Task(id,title,description,status,percent,priority,commentary,date_cloture);
                 numero_ligne++;
-                std::getline(fichier,ligne);
                 std::vector<Task*> vect_sub_task;
-                for(int i=0;i<=nbr_sous_tache;i++){
-                   std::string sub_title;
+                for(int i=0;i<nbr_sous_tache;i++){
+                    std::string sub_title;
                     std::string sub_percent;
                     std::string sub_closing_date;
-                   while(numero_ligne-i<=10){
-                    
-                    if(numero_ligne==8+i){
+                        std::getline(fichier,ligne);
                         sub_title=ligne;
-                        numero_ligne++;
                         std::getline(fichier,ligne);
-                        }
-                    else if(numero_ligne==9+i){
                         sub_percent=ligne;
-                        numero_ligne++;
                         std::getline(fichier,ligne);
-                        }
-                    else if(numero_ligne==10+i){
-                        
                         sub_closing_date=ligne;
-                        numero_ligne++;
-                        std::getline(fichier,ligne);
-                        }
-                    }
+        
+                    
                     Task* new_ad_sub_task=new Task(0,sub_title,"","",sub_percent,"","",sub_closing_date);
                     vect_sub_task.push_back(new_ad_sub_task);
                 }
