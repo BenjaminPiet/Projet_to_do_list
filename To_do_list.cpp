@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include "To_do_list.h"
 
 //////////////Fonctions relatives à Task///////////
@@ -206,17 +207,26 @@ std::string Task_manager::ask_status(){
     return "";}
     }
 
-void Task_manager::save_task(Task* new_ad_task){
+void Task_manager::save_task(){
     std::ofstream fichier("Save_list.txt");
     if (fichier){
-        fichier.seekp(0,std::ios::end);
-        fichier<<new_ad_task->title<<std::endl;
-        fichier<<new_ad_task->description<<std::endl;
-        fichier<<new_ad_task->status<<std::endl;
-        fichier<<new_ad_task->percent<<std::endl;
-        fichier<<new_ad_task->priority<<std::endl;
-        fichier<<new_ad_task->commentary<<std::endl;
-        fichier<<new_ad_task->closing_date<<std::endl;
+        fichier.seekp(0,std::ios::beg);//on se place au debut
+        for (auto e:vect_ad_tache){//on sauvegarde toutes les taches en une seule fois
+            int len=(e->sub_task).size();//pour ajouter et lire les sous_taches, il nous faudra leur nombre
+            fichier<<len<<std::endl;
+            fichier<<e->title<<std::endl;
+            fichier<<e->description<<std::endl;
+            fichier<<e->status<<std::endl;
+            fichier<<e->percent<<std::endl;
+            fichier<<e->priority<<std::endl;
+            fichier<<e->commentary<<std::endl;
+            fichier<<e->closing_date<<std::endl;
+            for(auto sous_tache:e->sub_task){//pour toutes les sous-taches dans la tache
+                fichier<<sous_tache->title<<std::endl;
+                fichier<<sous_tache->percent<<std::endl;
+                fichier<<sous_tache->closing_date<<std::endl;
+            }
+        }
 }
     else{std::cout<<"ERREUR, impossible d'acceder au fichier de sauvegarde"<<std::endl;}
 }
@@ -263,7 +273,7 @@ void Task_manager::add_task(){
         vect_ad_tache.push_back(ad_new_task);
         nbr++;
         std::cout<<"ajout de tache confirmé"<<std::endl;
-        save_task(ad_new_task);
+        std::cout<<"l'ajout de sous-tache se fait dans la partie modification"<<std::endl;
         init();
         }
 }
@@ -283,7 +293,7 @@ void Task_manager::read_save_file(){
         fichier.seekg(0,std::ios::beg);
         int numero_ligne=0;
         int numero_tache=0;
-        int id;
+        int nbr_sous_tache=0;
         std::string title;
         std::string description;
         std::string status;
@@ -291,17 +301,17 @@ void Task_manager::read_save_file(){
         std::string priority;
         std::string commentary;
         std::string date_cloture;
-
         std::string ligne;
         while(std::getline(fichier,ligne)){
-            id=numero_tache;
-            if(numero_ligne==0){title=ligne;numero_ligne++;}
-            else if(numero_ligne==1){description=ligne;numero_ligne++;}
-            else if(numero_ligne==2){status=ligne;numero_ligne++;}
-            else if(numero_ligne==3){percent=ligne;numero_ligne++;}
-            else if(numero_ligne==4){priority=ligne;numero_ligne++;}
-            else if(numero_ligne==5){commentary=ligne;numero_ligne++;}
-            else if(numero_ligne==6){
+            int id=numero_tache;
+            if(numero_ligne==0){nbr_sous_tache=std::atoi(ligne.c_str());numero_ligne++;}
+            else if(numero_ligne==1){title=ligne;numero_ligne++;}
+            else if(numero_ligne==2){description=ligne;numero_ligne++;}
+            else if(numero_ligne==3){status=ligne;numero_ligne++;}
+            else if(numero_ligne==4){percent=ligne;numero_ligne++;}
+            else if(numero_ligne==5){priority=ligne;numero_ligne++;}
+            else if(numero_ligne==6){commentary=ligne;numero_ligne++;}
+            else if(numero_ligne==7 && nbr_sous_tache==0){
                 date_cloture=ligne;
                 Task* new_ad_task=new Task(id,title,description,status,percent,priority,commentary,date_cloture);
                 vect_ad_tache.push_back(new_ad_task);
@@ -309,6 +319,44 @@ void Task_manager::read_save_file(){
                 numero_ligne=0;
                 numero_tache++;
                 }
+            else if(numero_ligne==7 && nbr_sous_tache!=0){
+                date_cloture=ligne;
+                Task* new_ad_task=new Task(id,title,description,status,percent,priority,commentary,date_cloture);
+                numero_ligne++;
+                std::getline(fichier,ligne);
+                std::vector<Task*> vect_sub_task;
+                for(int i=0;i<=nbr_sous_tache;i++){
+                   std::string sub_title;
+                    std::string sub_percent;
+                    std::string sub_closing_date;
+                   while(numero_ligne-i<=10){
+                    
+                    if(numero_ligne==8+i){
+                        sub_title=ligne;
+                        numero_ligne++;
+                        std::getline(fichier,ligne);
+                        }
+                    else if(numero_ligne==9+i){
+                        sub_percent=ligne;
+                        numero_ligne++;
+                        std::getline(fichier,ligne);
+                        }
+                    else if(numero_ligne==10+i){
+                        
+                        sub_closing_date=ligne;
+                        numero_ligne++;
+                        std::getline(fichier,ligne);
+                        }
+                    }
+                    Task* new_ad_sub_task=new Task(0,sub_title,"","",sub_percent,"","",sub_closing_date);
+                    vect_sub_task.push_back(new_ad_sub_task);
+                }
+                new_ad_task->sub_task=vect_sub_task;
+                vect_ad_tache.push_back(new_ad_task);
+                nbr++;
+                numero_ligne=0;
+                numero_tache++;
+            }
 
         }
 
@@ -327,7 +375,8 @@ void Task_manager::init(){
      std::cout<<"3.Réinitialiser le TaskManager"<<std::endl;
      int num=0;
      std::cin>>num;
-     if(num==0){std::cout<<"Quitting..."<<std::endl;}
+     if(num==0){save_task();//on sauvegarde toutes les taches présentes dans le vecteur
+        std::cout<<"Quitting..."<<std::endl;}
      else if(num==1){print_task_list();}
      else if(num==2){add_task();}
      else if(num==3){reinit_task_manager();}

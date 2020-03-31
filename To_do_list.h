@@ -55,7 +55,7 @@ class Task_manager{
     public:
     Task_manager():nbr(0){};
     void read_save_file();
-    void save_task(Task* new_ad_task);
+    void save_task();
     void init();
     void print_task_list();
     void add_task();
