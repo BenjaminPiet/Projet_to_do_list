@@ -82,7 +82,7 @@ void Task::print(){
     for(auto e :sub_task){
         print_sub_task(e);
         std::cout<<""<<std::endl;//pour rajouter une ligne blanche entre chaque sous-taches
-        };
+    };
 
 }
 
@@ -111,9 +111,8 @@ void Task_manager::delete_sub_task(int n){
         if(choix==0){modify_task(n);}
         else if(choix!=0 && choix<selected_ad_task->sub_task.size()){
             selected_ad_task->sub_task.erase(selected_ad_task->sub_task.begin()+i-1);
-        }
+        }   
         else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl;delete_sub_task(n);}
-
 }
 
 void Task_manager::modify_task(int n){
@@ -149,10 +148,8 @@ void Task_manager::modify_task(int n){
     else if(choix==6){selected_ad_task->change_closing_date();
                     std::cout<<"Changement confirmé"<<std::endl;
                     modify_task(n);}
-    else if(choix==7){
-        selected_ad_task->add_subtask();
-        modify_task(n);
-        }
+    else if(choix==7){selected_ad_task->add_subtask();
+                      modify_task(n);}
     else if(choix==8){delete_sub_task(n);}
     else{std::cout<<"Choix non reconnu. Recommencez"<<std::endl;
         modify_task(n);}
@@ -160,7 +157,7 @@ void Task_manager::modify_task(int n){
 void Task_manager::remove_task(int n){
     vect_ad_tache.erase(vect_ad_tache.begin()+n);
     print_task_list();// fait un pop de la tache dans la liste de tache 
-                     //il ne sera donc pas sauvegardé
+                     //il ne sera donc pas sauvegardé dasn la liste de taches
 }
 
 void Task_manager::select_task(int n){
